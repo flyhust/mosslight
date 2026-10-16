@@ -2,12 +2,17 @@
 
 An original browser survival roguelite. Guide a little woodland spirit through **The Hollow**, gather light, and grow your gifts. Built with **Phaser 3.90, TypeScript 5.9 and Vite 7**. This is the first playable milestone, not the complete long-term game.
 
+**[Play online](https://flyhust.github.io/mosslight/)** · [GitHub repository](https://github.com/flyhust/mosslight)
+
+The published version is the playable **2D prototype**. The proposed 3D mage RPG migration has not been implemented yet.
+
 ## Start playing
 
 Requires **Node.js 24 LTS** and npm. In PowerShell:
 
 ```powershell
-cd "C:\Users\Qwerty\Documents\Codex\2026-10-16\files-pasted-by-the-user-project\outputs\mosslight"
+git clone https://github.com/flyhust/mosslight.git
+cd mosslight
 npm install
 npm run dev
 ```
@@ -113,7 +118,7 @@ The generated screen concept is a visual direction reference, not a shipped back
 - Scenery is decorative: creatures and the player can move across it. The outer arena boundary is solid.
 - Art is intentionally simple, original, code-created pixel art. No external asset downloads are required.
 - The Phaser bundle is approximately 343 KB gzip; Vite emits a non-blocking large-chunk warning. The engine is needed at game startup, so splitting it alone would not reduce initial download size.
-- Local Git version control is initialized. No GitHub remote or publication is configured because no destination repository was supplied.
+- GitHub Actions tests and builds pushes to `main`, then publishes `dist/` to GitHub Pages. The deployment build uses `/mosslight/` as its asset base; local development keeps `/`.
 
 ## Asset provenance
 
