@@ -1,0 +1,23 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { InputController } from '../src/game/input.ts';
+test('pointer drag normalizes, ignores a second finger, cancels safely, and removes listeners', () => {
+  const win = new EventTarget(), doc = new EventTarget();
+  Object.assign(globalThis, { window: win, document: doc });
+  const surface = Object.assign(new EventTarget(), { setPointerCapture: () => {} });
+  const classes = new Set<string>();
+  const stick = { style: { setProperty: () => {} }, classList: { add: (v: string) => classes.add(v), remove: (v: string) => classes.delete(v) } };
+  const keys: string[] = []; let blurs = 0;
+  const input = new InputController(surface as never, stick as never, key => keys.push(key), () => blurs++);
+  const emit = (target: EventTarget, name: string, values: object) => { const event = new Event(name, { cancelable: true }); Object.assign(event, values); target.dispatchEvent(event); };
+  emit(surface, 'pointerdown', { button: 0, pointerId: 1, clientX: 100, clientY: 100 });
+  emit(surface, 'pointermove', { pointerId: 1, clientX: 200, clientY: 200 });
+  assert.ok(Math.abs(Math.hypot(input.vector.x, input.vector.y) - 1) < 1e-12);
+  emit(surface, 'pointerdown', { button: 0, pointerId: 2, clientX: 0, clientY: 0 });
+  emit(surface, 'pointerup', { pointerId: 2 }); assert.ok(input.vector.x > 0);
+  emit(surface, 'pointercancel', { pointerId: 1 }); assert.deepEqual(input.vector, { x: 0, y: 0 }); assert.equal(classes.has('visible'), false);
+  emit(win, 'keydown', { key: 'd', repeat: false }); assert.equal(input.vector.x, 1);
+  emit(win, 'blur', {}); assert.deepEqual(input.vector, { x: 0, y: 0 }); assert.equal(blurs, 1);
+  input.destroy(); emit(win, 'keydown', { key: 'w', repeat: false }); assert.deepEqual(keys, ['d']); assert.equal(input.vector.y, 0);
+  Reflect.deleteProperty(globalThis, 'window'); Reflect.deleteProperty(globalThis, 'document');
+});
